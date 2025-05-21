@@ -1,0 +1,56 @@
+@font-face {
+  font-family: 'ferrari';
+  src: url(/fontes/FerroRosso.ttf);
+}
+
+@font-face {
+    font-family:'noto-sans';
+    src: url(/fontes/NotoSans-VariableFont_wdth\,wght.ttf);
+}
+
+.invert{
+    filter: invert(100%);
+    transition: filter 500ms ease;
+}
+
+
+header{
+    position: fixed;
+    width: 100%;
+    transition: background-color 500ms ease;
+}
+
+header.rolagem{
+    background-color: black;
+    
+}
+
+#logoferrari {
+    padding: 15px;
+}
+
+.navbar{
+    position: absolute;
+    top: 33%;
+    left: 18%;
+    transform: translateX(-50%);
+}
+
+a{
+    text-decoration: none;
+    color: #ffffff;                /*#FFF200 #E4141E*/
+    font: normal 17px 'noto-sans';
+    padding: 0px 20px;
+    letter-spacing: 2px;
+}
+
+#vidfundo{
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    max-width: 100%;
+    z-index: -1;
+    object-fit: cover;
+
+}

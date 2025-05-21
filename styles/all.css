@@ -1,0 +1,53 @@
+@font-face {
+  font-family: 'ferrari';
+  src: url(/fontes/FerroRosso.ttf);
+}
+
+@font-face {
+  font-family: 'noto-sans';
+  src: url(/fontes/NotoSans-VariableFont_wdth\,wght.ttf);
+}
+
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}   
+
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+    background-image: linear-gradient(to bottom, rgb(0, 0, 0), transparent), url("/videos/ferrari.mp4");
+    height: 100vh; /* Mantém o vídeo visível até a altura da janela */
+    overflow: hidden;
+    position: relative;
+    margin: 0px;
+    width: 100%;
+}
+
+.potencia{
+    margin-top: 700px;
+    width: 100%;
+}
+
+.potencia > h2{
+    color: white;
+    font: lighter 36px 'noto-sans';
+    text-align: center;
+}
+
+#main {
+    height: 100vh; /* TIRAR DEPOIS DE TERMINAR!!*/
+    background-color: white;
+    width: 100%;
+    position: relative;
+    z-index: -1;
+}
+
+
