@@ -5,7 +5,7 @@
 
 @font-face {
     font-family:'noto-sans';
-    src: url(/fontes/NotoSans-VariableFont_wdth\,wght.ttf);
+    src: url(../fontes/NotoSans-VariableFont_wdth\,wght.ttf);
 }
 
 .invert{
