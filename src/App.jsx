@@ -15,9 +15,9 @@ export default function App() {
           <img id="logoferrari" src="/imagens/whitehorse.png" width="70" height="85" />
           <nav className="navbar" id="a">
             <a href="#">Home</a>
-            <a href="#">About</a>
             <a href="#">Racing</a>
             <a href="#">Collections</a>
+            <a href="#">About</a>
           </nav>
         </header>
 
@@ -32,8 +32,10 @@ export default function App() {
 
       <main id="main">
         <h2>Conheça nossos pilotos:</h2>
-        <PilotoCard nome="Charles Leclerc" imagem="/imagens/chalec01.avif" />
-        <PilotoCard nome="Lewis Hamilton" imagem="/imagens/lewham01.avif" />
+        <div className="CARDS">
+          <PilotoCard nome="Charles Leclerc" imagem="/imagens/chalec01.avif"/>
+          <PilotoCard nome="Lewis Hamilton" imagem="/imagens/lewham01.avif" />
+        </div>
       </main>
     </>
   );
