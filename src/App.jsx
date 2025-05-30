@@ -1,7 +1,11 @@
 import BotaoDescubra from "./components/BotaoDescubra";
 import PilotoCard from "./components/PilotoCard";
-import "../styles/all.css"; // Pode importar seus estilos normais aqui
+import TextoAnimado from "./components/TextoAnimado"
+import "../styles/all.css"; //  Seus estilos normais aqui
 import "../styles/header.css"; // Estilos específicos do header
+import "../styles/main.css"; // Estilos específicos da seção MAIN
+import "../styles/TextoAnimado.css"; // Estilos específicos do TextoAnimado
+
 
 export default function App() {
   return (
@@ -32,10 +36,16 @@ export default function App() {
 
       <main id="main">
         <h2>Conheça nossos pilotos:</h2>
-        <div className="CARDS">
-          <PilotoCard nome="Charles Leclerc" imagem="/imagens/chalec01.avif"/>
-          <PilotoCard nome="Lewis Hamilton" imagem="/imagens/lewham01.avif" />
-        </div>
+          <div className="leclerc">
+            <div className="cardlec">
+              <PilotoCard nome="Charles Leclerc" imagem="/imagens/chalec01.avif"/>
+            </div>
+                    <div className="biolec">
+                      <div className="textlec">
+                        <TextoAnimado text="Charles Leclerc, nascido em 1997 em Monte Carlo, é um piloto monegasco de Fórmula 1. Campeão da Fórmula 2 em  2017, estreou na F1 em 2018 pela Sauber e desde 2019 corre pela Ferrari, onde é destaque pela velocidade e talento." />
+                      </div>
+                    </div>
+          </div>
       </main>
     </>
   );

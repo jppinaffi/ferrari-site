@@ -1,0 +1,25 @@
+.animated-text span{
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(-20px);
+    color: black;
+    animation: drop 0.5s forwards;
+    font-weight: 250;
+    font-family: 'noto-sans';
+    font-size: 35px;
+}
+
+@keyframes drop{
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.biolec{
+    margin-top: 220px;
+    margin-right: 210px;
+    max-width: 600px;
+
+    
+}

@@ -1,12 +1,14 @@
 export default function BotaoDescubra({ onClick }) {
   return (
-    <button
-      type="button"
-      className="btn btn-outline-light"
-      id="botaovideo"
-      onClick={onClick}
-    >
-      Descubra
-    </button>
+    
+      <a href="https://www.ferrari.com/en-EN/formula1/sf-25" target="_blank" rel="noopener noreferrer" className="btn btn-outline-light"
+          type="button"
+          id="botaovideo"
+          onClick={onClick}
+        >
+          Descubra
+        
+      </a>
+    
   );
 }

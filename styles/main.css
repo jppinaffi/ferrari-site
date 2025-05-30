@@ -1,0 +1,64 @@
+#main {
+  margin: 0 auto;
+}
+
+#main > h2{
+    font: lighter 60px 'noto-sans';
+    color: rgb(0, 0, 0);
+    text-align: center;
+    margin-top: 80px;
+    padding-bottom: 100px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}	
+
+.card{
+  border-style: solid;
+  border-color: rgb(121, 121, 121);
+  border-width: 1px;
+  border-radius: 30px;
+  display: inline-block;
+  background-image: linear-gradient(to top, rgb(255, 255, 255), rgba(150, 27, 27, 0.5), rgba(255, 0, 0, 0.7)) 
+  
+}
+
+.card-body > a{
+  text-decoration: none;
+  color: rgb(255, 255, 255);
+  font: normal 20px 'noto-sans';
+  padding: 10px 20px;
+  margin-top: 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  display: block;
+  margin: 20px;
+}
+
+.card-body > a:hover{
+  background-color: #771d26;
+  transition: background-color .3s ease;
+}
+
+
+.card > img{
+  width: 500px;
+  height: 500px;
+}
+
+.card-body > h5{
+  font: lighter 60px 'noto-sans';
+  color: black;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+.leclerc{
+  display: flex;
+}
+
+.cardlec{
+  display: inline-block;
+  width: 800px;
+  height: 100%;
+  margin-left: 300px;
+  
+}
+
