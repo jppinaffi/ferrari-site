@@ -5,6 +5,7 @@ import "../styles/all.css"; //  Seus estilos normais aqui
 import "../styles/header.css"; // Estilos específicos do header
 import "../styles/main.css"; // Estilos específicos da seção MAIN
 import "../styles/TextoAnimado.css"; // Estilos específicos do TextoAnimado
+import '../card.js'; // Importando o script card.js
 
 
 export default function App() {
@@ -35,7 +36,7 @@ export default function App() {
       </div>
 
       <main id="main">
-        <h2>Conheça nossos pilotos:</h2>
+        <h2 className="conheca">Conheça nossos pilotos:</h2>
           <div className="leclerc">
             <div className="cardlec">
               <PilotoCard nome="Charles Leclerc" imagem="/imagens/chalec01.avif"/>

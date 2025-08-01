@@ -9,9 +9,9 @@
 }
 
 @keyframes mover {
-  0%   { transform: translateX(0); }
-  50% { transform: translateX(50px); } 
-  100% { transform: translateX(0px); }
+  0%   { transform: translateX(50px); opacity: 0; }
+
+  100% { transform: translateX(0px); opacity: 1; }
 }
 
 *{
@@ -44,6 +44,7 @@ html, body {
 .potencia > h2{
     color: white;
     font: lighter 36px 'noto-sans';
+    animation: mover 1s ease-in-out forwards;
 }
 
 #botaovideo{
