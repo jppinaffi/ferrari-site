@@ -5,7 +5,7 @@
 
 @font-face {
     font-family:'noto-sans';
-    src: url(../fontes/NotoSans-VariableFont_wdth\,wght.ttf);
+    src: url(/fontes/NotoSans-VariableFont_wdth_wght.ttf);
 }
 
 .invert{
@@ -36,8 +36,8 @@ header.rolagem{
 }
 
 a{
-    text-decoration: none;
-    color: #ffffff;                /*#FFF200 #E4141E*/
+    text-decoration: none !important;
+    color: #ffffff !important;                /*#FFF200 #E4141E*/
     font: normal 17px 'noto-sans';
     padding: 10px 20px;
     letter-spacing: 2px;
@@ -46,9 +46,9 @@ a{
 
 a:hover{
     background-color: #ffffff;
-    color: black;
-    transition: color 0.2 ease;
-    transition: background-color 0.2s ease;
+    color: black !important;
+    transition: color 0.2s ease !important;
+    transition: background-color 0.2s ease !important;
 
     
     
