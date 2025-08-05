@@ -6,14 +6,15 @@ import "./styles/header.css"; // Estilos específicos do header
 import "./styles/main.css"; // Estilos específicos da seção MAIN
 import "./styles/TextoAnimado.css"; // Estilos específicos do TextoAnimado
 import './scripts/header.js'; // Importando o script header.js
+import './scripts/card.js'; // Importando o script card.js
 import './styles/custom.scss'; // Importando o SCSS personalizado
-import ScrollEffect from "./components/ScrollCard.jsx";
+//import ScrollEffect from "./components/ScrollCard.jsx";
+
 
 
 export default function App() {
   return (
     <>
-      <ScrollEffect />
       <div className="container" id="container">
         <video autoPlay muted loop id="vidfundo">
           <source src="/videos/ferrari.mp4" type="video/mp4" />

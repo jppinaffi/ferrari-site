@@ -7,6 +7,7 @@ import './styles/TextoAnimado.css'
 import './styles/header.css'
 import App from './App.jsx'
 import './scripts/header.js'
+import './scripts/card.js'
 
 
 
