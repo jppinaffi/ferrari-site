@@ -1,15 +1,16 @@
 @keyframes fadeIn {
   from {
-    opacity: 0;
+    opacity: 0;   
+    visibility: hidden; /* Torna o texto invisível inicialmente */
   }
   to {
     opacity: 1;
+    visibility: visible; /* Torna o texto visível */
   }
 }
 
 .fadecard{
-  animation: fadeIn 1.5s ease-in-out;
-  visibility: visible !important;
+  animation: fadeIn 1s ease-in-out;
 }
 
 
@@ -25,17 +26,17 @@
     margin-top: 80px;
     padding-bottom: 100px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    visibility: hidden;
+    
 }	
 
 .card{
   border-style: solid;
   border-color: rgb(121, 121, 121);
   border-width: 1px;
-  border-radius: 30px;
+  border-radius: 30px !important;
   display: inline-block;
   background-image: linear-gradient(to top, rgb(255, 255, 255), rgba(150, 27, 27, 0.5), rgba(255, 0, 0, 0.7));
-  visibility: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .card-body > a{
@@ -67,6 +68,7 @@
   text-align: center;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 .leclerc{
   display: flex;
 }
@@ -76,6 +78,5 @@
   width: 800px;
   height: 100%;
   margin-left: 300px;
-  
 }
 

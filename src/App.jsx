@@ -1,11 +1,15 @@
 import BotaoDescubra from "./components/BotaoDescubra";
 import PilotoCard from "./components/PilotoCard";
 import TextoAnimado from "./components/TextoAnimado"
-import "../styles/all.css"; //  Seus estilos normais aqui
-import "../styles/header.css"; // Estilos específicos do header
-import "../styles/main.css"; // Estilos específicos da seção MAIN
-import "../styles/TextoAnimado.css"; // Estilos específicos do TextoAnimado
-import '../card.js'; // Importando o script card.js
+import "./styles/all.css"; //  Seus estilos normais aqui
+import "./styles/header.css"; // Estilos específicos do header
+import "./styles/main.css"; // Estilos específicos da seção MAIN
+import "./styles/TextoAnimado.css"; // Estilos específicos do TextoAnimado
+import './scripts/header.js'; // Importando o script header.js
+import './scripts/card.js'; // Importando o script card.js
+import './styles/custom.scss'; // Importando o SCSS personalizado
+//import ScrollEffect from "./components/ScrollCard.jsx";
+
 
 
 export default function App() {
