@@ -33,7 +33,7 @@
   border-style: solid;
   border-color: rgb(121, 121, 121);
   border-width: 1px;
-  border-radius: 30px;
+  border-radius: 30px !important;
   display: inline-block;
   background-image: linear-gradient(to top, rgb(255, 255, 255), rgba(150, 27, 27, 0.5), rgba(255, 0, 0, 0.7));
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
