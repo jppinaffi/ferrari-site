@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -13,9 +14,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-black/90 backdrop-blur-md' : 'bg-transparent'
-    }`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-md' : 'bg-transparent'
+      }`}>
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Ferrari Logo */}
@@ -28,10 +28,10 @@ export default function Header() {
 
           {/* Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-white hover:text-red-500 transition-colors">Home</a>
-            <a href="#racing" className="text-white hover:text-red-500 transition-colors">Racing</a>
-            <a href="#collections" className="text-white hover:text-red-500 transition-colors">Collections</a>
-            <a href="#about" className="text-white hover:text-red-500 transition-colors">About</a>
+            <Link to="/" className="text-white hover:text-red-500 transition-colors">Home</Link>
+            <Link to="/races" className="text-white hover:text-red-500 transition-colors">Races</Link>
+            <a href="/#collections" className="text-white hover:text-red-500 transition-colors">Collections</a>
+            <a href="/#about" className="text-white hover:text-red-500 transition-colors">About</a>
           </div>
 
           {/* Mobile menu button */}

@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "lib": ["dom", "es6"],
-    "types": ["react", "react-dom"],
+    "lib": [
+      "dom",
+      "es6"
+    ],
+    "types": [
+      "react",
+      "react-dom"
+    ],
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
