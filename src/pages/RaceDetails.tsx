@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getMeeting, getRaceSession, getRaceResults, getDrivers, Meeting, RaceResult, Driver } from '../services/f1Api';
+import {
+    getMeeting,
+    getRaceSession,
+    getRaceResults,
+    getDrivers,
+    getLaps,
+    getCircuit,
+    Meeting,
+    RaceResult,
+    Driver
+} from '../services/f1Api';
 
 interface EnrichedResult extends RaceResult {
     driver?: Driver;
@@ -11,6 +21,8 @@ export default function RaceDetails() {
     const [meeting, setMeeting] = useState<Meeting | null>(null);
     const [results, setResults] = useState<EnrichedResult[]>([]);
     const [loading, setLoading] = useState(true);
+    const [totalLaps, setTotalLaps] = useState<number>(0);
+    const [circuitLength, setCircuitLength] = useState<number>(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -22,24 +34,69 @@ export default function RaceDetails() {
                 setMeeting(meetingData);
 
                 if (meetingData) {
+                    // Fetch Circuit Info
+                    if (meetingData.circuit_key) {
+                        const circuit = await getCircuit(meetingData.circuit_key);
+                        if (circuit) {
+                            setCircuitLength(circuit.circuit_length || 0);
+                        }
+                    }
+
                     const session = await getRaceSession(key);
                     if (session) {
-                        const [raceResults, drivers] = await Promise.all([
+                        const [raceResults, drivers, laps] = await Promise.all([
                             getRaceResults(session.session_key),
-                            getDrivers(session.session_key)
+                            getDrivers(session.session_key),
+                            getLaps(session.session_key)
                         ]);
+
+                        // Circuit Length Fallback (in meters)
+                        const CIRCUIT_LENGTHS: Record<string, number> = {
+                            'Bahrain International Circuit': 5412,
+                            'Jeddah Corniche Circuit': 6174,
+                            'Albert Park Circuit': 5278,
+                            'Suzuka International Racing Course': 5807,
+                            'Shanghai International Circuit': 5451,
+                            'Miami International Autodrome': 5412,
+                            'Autodromo Enzo e Dino Ferrari': 4909,
+                            'Circuit de Monaco': 3337,
+                            'Circuit Gilles Villeneuve': 4361,
+                            'Circuit de Barcelona-Catalunya': 4657,
+                            'Red Bull Ring': 4318,
+                            'Silverstone Circuit': 5891,
+                            'Hungaroring': 4381,
+                            'Circuit de Spa-Francorchamps': 7004,
+                            'Circuit Zandvoort': 4259,
+                            'Autodromo Nazionale Monza': 5793,
+                            'Baku City Circuit': 6003,
+                            'Marina Bay Street Circuit': 4940,
+                            'Circuit of The Americas': 5513,
+                            'Autódromo Hermanos Rodríguez': 4304,
+                            'Interlagos Circuit': 4309,
+                            'Las Vegas Strip Circuit': 6201,
+                            'Lusail International Circuit': 5419,
+                            'Yas Marina Circuit': 5281
+                        };
+
+                        // Calculate total laps
+                        if (laps.length > 0) {
+                            const maxLap = Math.max(...laps.map(l => l.lap_number));
+                            setTotalLaps(maxLap);
+                        }
+
+                        // Use API length or fallback
+                        if (meetingData.circuit_short_name && !circuitLength) {
+                            const fallback = CIRCUIT_LENGTHS[meetingData.circuit_short_name] ||
+                                CIRCUIT_LENGTHS[Object.keys(CIRCUIT_LENGTHS).find(k => meetingData.circuit_short_name.includes(k) || k.includes(meetingData.circuit_short_name)) || ''];
+                            if (fallback) setCircuitLength(fallback);
+                        }
 
                         const enriched = raceResults.map(result => ({
                             ...result,
                             driver: drivers.find(d => d.driver_number === result.driver_number)
                         })).sort((a, b) => {
-                            // Sort logic: 
-                            // 1. Classified drivers (position > 0) come first, sorted by position
-                            // 2. Unclassified drivers (position 0 or null) come last
-
                             const posA = (a.position && a.position > 0) ? a.position : 999;
                             const posB = (b.position && b.position > 0) ? b.position : 999;
-
                             return posA - posB;
                         });
 
@@ -79,6 +136,8 @@ export default function RaceDetails() {
             </div>
         );
     }
+
+    const raceDistance = totalLaps && circuitLength ? (totalLaps * circuitLength / 1000).toFixed(3) : '--';
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900"
@@ -139,12 +198,20 @@ export default function RaceDetails() {
                                             <th className="px-6 py-4 text-left">Pos</th>
                                             <th className="px-6 py-4 text-left">Piloto</th>
                                             <th className="px-6 py-4 text-left">Equipe</th>
-                                            <th className="px-6 py-4 text-right">Tempo/Status</th>
+                                            <th className="px-6 py-4 text-right">Tempo/Distância para o Primeiro</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-800">
                                         {results.map((result) => {
                                             const isFerrari = result.driver?.team_name.toLowerCase().includes('ferrari');
+                                            const isFinished = result.status === 'Finished';
+                                            const isWinner = result.position === 1;
+                                            const displayStatus = isWinner
+                                                ? formatTime(result.duration)
+                                                : result.gap_to_leader
+
+                                            const displayPosition = (result.position && result.position > 0) ? result.position : 'DNF';
+
                                             return (
                                                 <tr key={result.driver_number}
                                                     className={`
@@ -161,7 +228,7 @@ export default function RaceDetails() {
                                                                     result.position === 3 ? 'text-orange-400' :
                                                                         'text-gray-400'}
                                                         `}>
-                                                            {result.position}
+                                                            {displayPosition}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -187,11 +254,7 @@ export default function RaceDetails() {
                                                         {result.driver?.team_name}
                                                     </td>
                                                     <td className="px-6 py-4 text-right font-mono text-sm text-gray-300">
-                                                        {result.position === 1
-                                                            ? formatTime(result.duration)
-                                                            : result.status === 'Finished'
-                                                                ? `+${result.gap_to_leader?.toFixed(3)}s`
-                                                                : result.status}
+                                                        {displayStatus}
                                                     </td>
                                                 </tr>
                                             );
@@ -236,11 +299,11 @@ export default function RaceDetails() {
                                     </div>
                                     <div className="flex justify-between items-center pb-3 border-b border-gray-700">
                                         <span className="text-gray-400">Total de Voltas</span>
-                                        <span className="text-white font-mono">--</span>
+                                        <span className="text-white font-mono">{totalLaps || '--'}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-400">Distância</span>
-                                        <span className="text-white font-mono">-- km</span>
+                                        <span className="text-white font-mono">{raceDistance} km</span>
                                     </div>
                                 </div>
                             </div>

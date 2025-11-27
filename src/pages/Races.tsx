@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUpcomingRaces, Meeting } from '../services/f1Api';
 import { calculateStandings, ConstructorStanding, DriverStanding } from '../utils/standingCalculator';
+import { fetchWithCache } from '../utils/apiHelpers';
 
 
 export default function Races() {
@@ -16,8 +17,7 @@ export default function Races() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
-                const meetings: Meeting[] = await response.json();
+                const meetings: Meeting[] = await fetchWithCache(`https://api.openf1.org/v1/meetings?year=${year}`);
                 const sortedMeetings = meetings.sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
                 setRaces(sortedMeetings);
 

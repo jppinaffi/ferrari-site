@@ -1,4 +1,5 @@
 import { getMeetingSessions, getRaceResults, getDrivers, Meeting, Driver, Session } from '../services/f1Api';
+import { fetchWithCache } from './apiHelpers';
 
 export interface DriverStanding {
     position: number;
@@ -25,9 +26,7 @@ const SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1];
 export const calculateStandings = async (year: number) => {
     try {
         // 1. Get all meetings for the year
-        const response = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
-        if (!response.ok) throw new Error('Failed to fetch meetings');
-        const meetings: Meeting[] = await response.json();
+        const meetings: Meeting[] = await fetchWithCache(`https://api.openf1.org/v1/meetings?year=${year}`);
 
         // 2. Filter for completed meetings (past date)
         const now = new Date();
