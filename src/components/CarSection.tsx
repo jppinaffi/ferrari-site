@@ -1,6 +1,7 @@
 import React from 'react';
 import { handleRedirect } from '../helpers/handleRedirect';
 import { ImageWithFallback } from './ImageWithFallback';
+import ColorBends from './react-bits/background-color-bends';
 //import exampleImage from 'figma:asset/3f8353ffb76660cfda5fdb716d3a2ad16c8d7277.png';
 
 export default function HeroSection() {
@@ -8,14 +9,26 @@ export default function HeroSection() {
     <section className="relative h-screen overflow-hidden">
       {/* Background Image/Video simulation */}
       <div className="absolute inset-0">
+        <ColorBends
+          colors={["#ff0000", "#ff0000ff", "#ff0000ff"]}
+          rotation={0}
+          speed={0.27}
+          scale={1.3}
+          frequency={1}
+          warpStrength={1}
+          mouseInfluence={0}
+          parallax={1.4}
+          noise={0.3}
+          transparent={false}
+        />
+
+        {/* 
         <ImageWithFallback 
           src={'../../images/SF-25.jpg'}
           alt="Ferrari F1 Car"
           className="w-full h-full object-cover opacity-30"
-        />
-        {/* Overlay gradients for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+          />
+        */}
       </div>
 
       {/* Content */}
@@ -46,11 +59,11 @@ export default function HeroSection() {
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
-                      onClick={() => handleRedirect('https://www.ferrari.com/en-EN/formula1/sf-25')}>
+                onClick={() => handleRedirect('https://www.ferrari.com/en-EN/formula1/sf-25')}>
                 Descubra
               </button>
               <button className="border border-white text-white hover:bg-white hover:text-black px-8 py-4 transition-all duration-300"
-                      onClick={() => handleRedirect('https://www.youtube.com/watch?v=ZWKp63JTvgE') }>
+                onClick={() => handleRedirect('https://www.youtube.com/watch?v=ZWKp63JTvgE')}>
                 Assista ao Vídeo
               </button>
             </div>
