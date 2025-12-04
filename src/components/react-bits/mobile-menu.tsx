@@ -48,7 +48,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     onMenuClose
 }: StaggeredMenuProps) => {
     const [open, setOpen] = useState(false);
-    const openRef = useRef(false);
 
     const panelRef = useRef<HTMLDivElement | null>(null);
     const preLayersRef = useRef<HTMLDivElement | null>(null);
@@ -255,7 +254,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         spinTweenRef.current?.kill();
 
         if (opening) {
-            // ensure container never rotates
             gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
             spinTweenRef.current = gsap
                 .timeline({ defaults: { ease: 'power4.out' } })
@@ -284,17 +282,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         },
         [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
     );
-
-    React.useEffect(() => {
-        if (toggleBtnRef.current) {
-            if (changeMenuColorOnOpen) {
-                const targetColor = openRef.current ? openMenuButtonColor : menuButtonColor;
-                gsap.set(toggleBtnRef.current, { color: targetColor });
-            } else {
-                gsap.set(toggleBtnRef.current, { color: menuButtonColor });
-            }
-        }
-    }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
 
     const animateText = useCallback((opening: boolean) => {
         const inner = textInnerRef.current;
@@ -328,41 +315,52 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         });
     }, []);
 
-    const toggleMenu = useCallback(() => {
-        const target = !openRef.current;
-        openRef.current = target;
-        setOpen(target);
+    // ✅ FIX: closeMenu agora é estável e usa callbacks atualizados
+    const closeMenu = useCallback(() => {
+        setOpen(false);
+        onMenuClose?.();
+        playClose();
+        animateIcon(false);
+        animateColor(false);
+        animateText(false);
+    }, [playClose, animateIcon, animateColor, animateText, onMenuClose]);
 
-        if (target) {
+    // ✅ FIX: toggleMenu usa apenas o state `open` (fonte única da verdade)
+    const toggleMenu = useCallback(() => {
+        if (busyRef.current) return;
+
+        const willOpen = !open;
+        setOpen(willOpen);
+
+        if (willOpen) {
             onMenuOpen?.();
             playOpen();
+            animateIcon(true);
+            animateColor(true);
+            animateText(true);
         } else {
-            onMenuClose?.();
-            playClose();
+            closeMenu();
         }
+    }, [open, playOpen, closeMenu, animateIcon, animateColor, animateText, onMenuOpen]);
 
-        animateIcon(target);
-        animateColor(target);
-        animateText(target);
-    }, [playOpen, playClose, animateIcon, animateColor, animateText, onMenuOpen, onMenuClose]);
-
-    const closeMenu = useCallback(() => {
-        if (openRef.current) {
-            openRef.current = false;
-            setOpen(false);
-            onMenuClose?.();
-            playClose();
-            animateIcon(false);
-            animateColor(false);
-            animateText(false);
+    // ✅ FIX: Sincroniza cores quando o menu fecha/abre
+    React.useEffect(() => {
+        if (toggleBtnRef.current) {
+            const targetColor = open ? openMenuButtonColor : menuButtonColor;
+            if (changeMenuColorOnOpen) {
+                gsap.set(toggleBtnRef.current, { color: targetColor });
+            } else {
+                gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+            }
         }
-    }, [playClose, animateIcon, animateColor, animateText, onMenuClose]);
+    }, [open, changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
 
     React.useEffect(() => {
         if (!closeOnClickAway || !open) return;
 
         const handleClickOutside = (event: MouseEvent) => {
-            if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+            if (panelRef.current && !panelRef.current.contains(event.target as Node) &&
+                toggleBtnRef.current && !toggleBtnRef.current.contains(event.target as Node)) {
                 closeMenu();
             }
         };
@@ -422,8 +420,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
                     <button
                         ref={toggleBtnRef}
-                        className={`sm-toggle relative inline-flex items-center gap-[0.3rem] bg-transparent border-0 cursor-pointer font-medium leading-none overflow-visible pointer-events-auto ${open ? 'text-black' : 'text-[#e9e9ef]'
-                            }`}
+                        className={`sm-toggle relative inline-flex items-center gap-[0.3rem] bg-transparent border-0 cursor-pointer font-medium leading-none overflow-visible pointer-events-auto`}
                         aria-label={open ? 'Close menu' : 'Open menu'}
                         aria-expanded={open}
                         aria-controls="staggered-menu-panel"
@@ -478,10 +475,11 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                                 items.map((it, idx) => (
                                     <li className="sm-panel-itemWrap relative overflow-hidden leading-none" key={it.label + idx}>
                                         <a
-                                            className="sm-panel-item relative text-black font-semibold text-[4rem] cursor-pointer leading-none tracking-[-2px] uppercase transition-[background,color] duration-150 ease-linear inline-block no-underline pr-[1.4em]"
                                             href={it.link}
+                                            className="sm-panel-item relative text-black font-semibold text-[4rem] cursor-pointer leading-none tracking-[-2px] uppercase transition-[background,color] duration-150 ease-linear inline-block no-underline pr-[1.4em]"
                                             aria-label={it.ariaLabel}
                                             data-index={idx + 1}
+                                            onClick={closeMenu}
                                         >
                                             <span className="sm-panel-itemLabel inline-block [transform-origin:50%_100%] will-change-transform">
                                                 {it.label}
