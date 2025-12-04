@@ -1,7 +1,7 @@
 
-  # Improve Ferrari Website Design
+  # Scuderria Ferrari
 
-  This is a code bundle for Improve Ferrari Website Design. The original project is available at https://www.figma.com/design/D0qariRaQP1qufLDUpC53l/Improve-Ferrari-Website-Design.
+  This is a code bundle for Scuderria Ferrari. The original project is available at https://www.figma.com/design/D0qariRaQP1qufLDUpC53l/Improve-Ferrari-Website-Design.
 
   ## Running the code
 
