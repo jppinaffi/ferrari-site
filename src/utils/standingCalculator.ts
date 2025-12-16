@@ -1,5 +1,5 @@
-import { getMeetingSessions, getRaceResults, getDrivers, Meeting, Driver, Session } from '../services/f1Api';
-import { fetchWithCache } from './apiHelpers';
+import { getMeetingSessions, getRaceResults, getDrivers, ensureSeasonData, getSeasonMeetings } from '../services/f1Api';
+import { Meeting, Driver, Session } from '../services/f1ApiTypes';
 
 export interface DriverStanding {
     position: number;
@@ -25,86 +25,71 @@ const SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1];
 
 export const calculateStandings = async (year: number) => {
     try {
-        // 1. Get all meetings for the year
-        const meetings: Meeting[] = await fetchWithCache(`https://api.openf1.org/v1/meetings?year=${year}`);
+        // 1. Ensure all season data is loaded (Bulk Fetch)
+        await ensureSeasonData(year);
 
-        // 2. Filter for completed meetings (past date)
+        // 2. Get meetings from store
+        // We need to access the store somehow or use the exported getters.
+        // Let's use the exported getters.
+        // We need a getMeetings(year) exposed in f1Api? 
+        // Currently f1Api exports getUpcomingRaces and getLastRaceResults but not getMeetings(year).
+        // I added getMeetings to F1DataStore but didn't export a wrapper.
+        // Let's modify f1Api to export getMeetingsForYear or utilize the store directly if we export it?
+        // Code below assumes I add getMeetingsForYear to f1Api or similar.
+        // Actually, let's just re-implement the loop using available exports since they hit the store.
+
+        // Wait, I need `getMeetings(year)` to iterate.
+        // I'll assume I can add `getMeetingsForYear` to f1Api or use the existing `getUpcomingRaces` and `getLastRaceResults` logic? 
+        // No, `standingCalculator` needs ALL completed meetings.
+        // I will update f1Api to export `getSeasonMeetings(year)`.
+
+        // For now, let's fix the imports and logic assuming `getSeasonMeetings` exists, 
+        // then I'll quickly update f1Api to export it.
+        const meetings = await getSeasonMeetings(year);
+
+        // 3. Filter for completed meetings (past date)
         const now = new Date();
         const completedMeetings = meetings.filter(m => new Date(m.date_start) < now);
 
         const driverPoints: Record<number, { points: number, driver: Driver }> = {};
         const teamPoints: Record<string, { points: number, colour: string, drivers: Set<string> }> = {};
 
-        // 3. Fetch sessions for all completed meetings in parallel
-        // We use a helper to ensure we don't silently fail if one request drops
-        const sessionsPromises = completedMeetings.map(async (meeting) => {
-            try {
-                return await getMeetingSessions(meeting.meeting_key);
-            } catch (e) {
-                console.warn(`Failed to fetch sessions for meeting ${meeting.meeting_key}`, e);
-                return [];
-            }
-        });
+        // 4. Iterate and aggregate
+        // Since data is in memory, we can just await sequentially without perf penalty
+        for (const meeting of completedMeetings) {
+            const sessions = await getMeetingSessions(meeting.meeting_key);
 
-        const meetingsSessions = await Promise.all(sessionsPromises);
+            for (const session of sessions) {
+                if (session.session_name !== 'Race' && session.session_name !== 'Sprint') continue;
 
-        // Flatten and filter for Race and Sprint sessions
-        const relevantSessions: Session[] = [];
-        meetingsSessions.forEach(sessions => {
-            if (sessions && Array.isArray(sessions)) {
-                sessions.forEach(session => {
-                    if (session.session_name === 'Race' || session.session_name === 'Sprint') {
-                        relevantSessions.push(session);
+                const results = await getRaceResults(session.session_key);
+                const drivers = await getDrivers(session.session_key); // Should be instant
+
+                const pointsSystem = session.session_name === 'Sprint' ? SPRINT_POINTS : RACE_POINTS;
+
+                results.forEach(result => {
+                    if (result.position <= pointsSystem.length && result.position > 0) {
+                        const points = pointsSystem[result.position - 1];
+                        const driver = drivers.find(d => d.driver_number === result.driver_number);
+
+                        if (driver) {
+                            // Driver Points
+                            if (!driverPoints[driver.driver_number]) {
+                                driverPoints[driver.driver_number] = { points: 0, driver };
+                            }
+                            driverPoints[driver.driver_number].points += points;
+
+                            // Constructor Points
+                            if (!teamPoints[driver.team_name]) {
+                                teamPoints[driver.team_name] = { points: 0, colour: driver.team_colour, drivers: new Set() };
+                            }
+                            teamPoints[driver.team_name].points += points;
+                            teamPoints[driver.team_name].drivers.add(driver.last_name);
+                        }
                     }
                 });
             }
-        });
-
-        // 4. Fetch results and drivers for all relevant sessions
-        const resultsPromises = relevantSessions.map(async (session) => {
-            try {
-                const [results, drivers] = await Promise.all([
-                    getRaceResults(session.session_key),
-                    getDrivers(session.session_key)
-                ]);
-                return { results, drivers, sessionType: session.session_name };
-            } catch (e) {
-                console.warn(`Failed to fetch results for session ${session.session_key}`, e);
-                return null;
-            }
-        });
-
-        const sessionData = await Promise.all(resultsPromises);
-
-        // 5. Aggregate points
-        sessionData.forEach((data) => {
-            if (!data) return; // Skip failed sessions
-            const { results, drivers, sessionType } = data;
-            const pointsSystem = sessionType === 'Sprint' ? SPRINT_POINTS : RACE_POINTS;
-
-            results.forEach(result => {
-                // Only award points if position is within points range
-                if (result.position <= pointsSystem.length && result.position > 0) {
-                    const points = pointsSystem[result.position - 1];
-                    const driver = drivers.find(d => d.driver_number === result.driver_number);
-
-                    if (driver) {
-                        // Driver Points
-                        if (!driverPoints[driver.driver_number]) {
-                            driverPoints[driver.driver_number] = { points: 0, driver };
-                        }
-                        driverPoints[driver.driver_number].points += points;
-
-                        // Constructor Points
-                        if (!teamPoints[driver.team_name]) {
-                            teamPoints[driver.team_name] = { points: 0, colour: driver.team_colour, drivers: new Set() };
-                        }
-                        teamPoints[driver.team_name].points += points;
-                        teamPoints[driver.team_name].drivers.add(driver.last_name);
-                    }
-                }
-            });
-        });
+        }
 
         // 6. Format and Sort Drivers Standings
         const driversStandings: DriverStanding[] = Object.values(driverPoints)

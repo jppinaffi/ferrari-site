@@ -7,10 +7,8 @@ import {
     getDrivers,
     getLaps,
     getCircuit,
-    Meeting,
-    RaceResult,
-    Driver
 } from '../services/f1Api';
+import { RaceResult, Driver, Meeting } from '../services/f1ApiTypes';
 
 interface EnrichedResult extends RaceResult {
     driver?: Driver;
