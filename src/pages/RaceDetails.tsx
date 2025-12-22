@@ -9,12 +9,15 @@ import {
     getCircuit,
 } from '../services/f1Api';
 import { RaceResult, Driver, Meeting } from '../services/f1ApiTypes';
+import { CircuitViewer } from '../components/CircuitViewer';
+import { circuitMap } from '../helpers/circuitMapper';
 
 interface EnrichedResult extends RaceResult {
     driver?: Driver;
 }
 
 export default function RaceDetails() {
+
     const { meetingKey } = useParams();
     const [meeting, setMeeting] = useState<Meeting | null>(null);
     const [results, setResults] = useState<EnrichedResult[]>([]);
@@ -116,7 +119,6 @@ export default function RaceDetails() {
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 pt-32 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-600 text-4xl font-bold mb-4 animate-pulse">SCUDERIA FERRARI</div>
-                    <div className="text-gray-400 text-lg">Carregando dados da corrida...</div>
                 </div>
             </div>
         );
@@ -268,12 +270,13 @@ export default function RaceDetails() {
                         <div className="sticky top-32 space-y-6">
                             {/* Track Map */}
                             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-2xl">
-                                <div className="bg-white p-8 aspect-square flex items-center justify-center">
+                                <div className="bg-gray-800 p-8 aspect-square flex items-center justify-center">
                                     <div className="text-center">
-                                        <div className="text-6xl mb-4">🏁</div>
+                                        {/*<img src={`../../public/tracks/${trackId}.svg`} alt={trackId} className="w-full h-full object-cover" />*/}
                                         <div className="font-bold text-xl text-white">
                                             Circuito
                                         </div>
+                                        <CircuitViewer circuitShortName={meeting.circuit_short_name} />
                                         <div className="text-sm text-white mt-2">
                                             {meeting.circuit_short_name}
                                         </div>

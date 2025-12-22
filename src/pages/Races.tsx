@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUpcomingRaces, Meeting } from '../services/f1Api';
 import { calculateStandings, ConstructorStanding, DriverStanding } from '../utils/standingCalculator';
 import { fetchWithCache } from '../utils/apiHelpers';
+import { Meeting } from '../services/f1ApiTypes';
+import Flag from 'react-world-flags';
 
 
 export default function Races() {
@@ -18,7 +19,9 @@ export default function Races() {
             setLoading(true);
             try {
                 const meetings: Meeting[] = await fetchWithCache(`https://api.openf1.org/v1/meetings?year=${year}`);
-                const sortedMeetings = meetings.sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
+                const sortedMeetings = meetings
+                    .filter(m => new Date(m.date_start) >= new Date(`${year}-03-01`))
+                    .sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
                 setRaces(sortedMeetings);
 
                 const { drivers, constructors } = await calculateStandings(year);
@@ -39,7 +42,6 @@ export default function Races() {
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 pt-24 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-600 text-4xl font-bold mb-4 animate-pulse">SCUDERIA FERRARI</div>
-                    <div className="text-gray-400 text-lg">Carregando temporada...</div>
                 </div>
             </div>
         );
@@ -126,8 +128,8 @@ export default function Races() {
                     </div>
                     {/* Races Grid */}
                     <div className="lg:col-span-2">
-                        {/* ALTERADO: grid-cols-3 no mobile e grid-cols-4 ou 5 em telas maiores para encolher os cards */}
-                        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {/* ALTERADO: Cards maiores (menos colunas) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                             {races.map((race) => {
                                 const isCompleted = new Date(race.date_start) < new Date();
                                 return (
@@ -135,7 +137,7 @@ export default function Races() {
                                         key={race.meeting_key}
                                         onClick={() => navigate(`/races/${race.meeting_key}`)}
                                         className={`
-                        group relative aspect-square rounded-xl p-2 
+                        group relative aspect-square rounded-xl p-3 
                         flex flex-col justify-between cursor-pointer 
                         transition-all duration-300 transform
                         bg-gradient-to-br from-gray-800 to-gray-900
@@ -145,30 +147,22 @@ export default function Races() {
                     `}
                                     >
 
-                                        <div className="text-center z-10">
-                                            <div className="text-xl mb-1 transform group-hover:scale-110 transition-transform">
-                                                {getFlagEmoji(race.country_code)}
+                                        <div className="text-center z-10 flex flex-col items-center h-full justify-center">
+                                            <div className="w-16 h-10 mb-3 transform group-hover:scale-110 transition-transform shadow-lg rounded overflow-hidden">
+                                                <Flag code={getCorrectFlagCode(race)} className="w-full h-full object-cover" fallback={<span>🏁</span>} />
                                             </div>
-                                            <div className="font-bold text-[10px] leading-tight mb-1 text-white truncate px-1">
+                                            <div className="font-bold text-sm leading-tight mb-1 text-white px-1">
                                                 {race.meeting_name.replace('Grand Prix', '').trim()}
                                             </div>
-                                            <div className="text-[9px] text-gray-400 truncate">
+                                            <div className="text-xs text-gray-400 truncate w-full">
                                                 {race.location}
                                             </div>
-                                        </div>
-
-                                        <div className="text-center">
-                                            <div className="text-[9px] text-gray-400 mb-1">
+                                            <div className="text-[15px] text-gray-500 mt-2 font-mono">
                                                 {new Date(race.date_start).toLocaleDateString('pt-BR', {
                                                     month: 'short',
                                                     day: 'numeric'
                                                 })}
                                             </div>
-                                            {isCompleted && (
-                                                <div className="text-[8px] text-red-500 font-bold flex items-center justify-center gap-1">
-                                                    Click to view results
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 );
@@ -236,6 +230,30 @@ export default function Races() {
     );
 }
 
-function getFlagEmoji(countryCode: string) {
-    return '🏁';
+function getCorrectFlagCode(race: Meeting): string {
+    const meetingName = race.meeting_name.toLowerCase();
+    const countryName = race.country_name?.toLowerCase() || '';
+    const location = race.location?.toLowerCase() || '';
+
+    // Saudi Arabia
+    if (countryName.includes('saudi') || location.includes('jeddah')) return 'SA';
+
+    // Monaco
+    if (countryName.includes('monaco') || meetingName.includes('monaco')) return 'MC';
+
+    // Netherlands
+    if (countryName.includes('netherlands') || meetingName.includes('dutch')) return 'NL';
+
+    // UAE / Abu Dhabi
+    if (countryName.includes('emirates') || location.includes('dhabi')) return 'AE';
+
+    // USA / United States
+    if (countryName.includes('united states') || countryName === 'usa') return 'US';
+
+    // Great Britain / UK
+    if (countryName.includes('britain') || countryName === 'uk') return 'GB';
+
+    if (countryName.includes('bahrain')) return 'BHR';
+
+    return race.country_code;
 }
