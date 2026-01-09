@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateStandings, ConstructorStanding, DriverStanding } from '../utils/standingCalculator';
-import { fetchWithCache } from '../utils/apiHelpers';
 import { Meeting } from '../services/f1ApiTypes';
 import Flag from 'react-world-flags';
+import { ensureSeasonData, getSeasonMeetings } from '../services/f1Api';
 
 
 export default function Races() {
     const navigate = useNavigate();
-    const [year, setYear] = useState(new Date().getFullYear());
+    // Default to 2024 or 2025 as needed
+    const [year, setYear] = useState(2025);
     const [races, setRaces] = useState<Meeting[]>([]);
     const [driverStandings, setDriverStandings] = useState<DriverStanding[]>([]);
     const [constructorStandings, setConstructorStandings] = useState<ConstructorStanding[]>([]);
@@ -18,15 +19,25 @@ export default function Races() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const meetings: Meeting[] = await fetchWithCache(`https://api.openf1.org/v1/meetings?year=${year}`);
-                const sortedMeetings = meetings
-                    .filter(m => new Date(m.date_start) >= new Date(`${year}-03-01`))
-                    .sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
-                setRaces(sortedMeetings);
+                // 1. Bulk load da temporada com o novo limite alto
+                await ensureSeasonData(year);
 
+                // 2. Busca reuniões da memória
+                const meetings = await getSeasonMeetings(year);
+
+                // 3. Filtro simples para garantir o ano
+                const filteredMeetings = meetings.filter(m => {
+                    const date = new Date(m.date_start);
+                    return date.getFullYear() === year;
+                });
+
+                setRaces(filteredMeetings);
+
+                // 4. Calcula standings (agora rápido pois tudo está em memória)
                 const { drivers, constructors } = await calculateStandings(year);
                 setDriverStandings(drivers);
                 setConstructorStandings(constructors);
+
             } catch (error) {
                 console.error('Error fetching race data:', error);
             } finally {
@@ -42,6 +53,7 @@ export default function Races() {
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 pt-24 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-600 text-4xl font-bold mb-4 animate-pulse">SCUDERIA FERRARI</div>
+                    <div className="text-gray-500 text-sm">Carregando dados da temporada...</div>
                 </div>
             </div>
         );
@@ -67,11 +79,26 @@ export default function Races() {
                     </p>
                 </div>
 
-                {/* Year Display */}
-                <div className="mb-8 flex justify-center"
-                    style={{ marginTop: '40px' }}>
-                    <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-full px-8 py-3 shadow-lg">
-                        <span className="text-white text-2xl font-bold">{year}</span>
+                {/* Year Selection Dropdown */}
+                <div className="mb-8 flex justify-center" style={{ marginTop: '40px' }}>
+                    <div className="relative">
+                        <select
+                            value={year}
+                            onChange={(e) => setYear(Number(e.target.value))}
+                            className="appearance-none bg-gradient-to-r from-red-600 to-red-700 text-white text-2xl font-bold px-8 py-3 rounded-full shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 hover:from-red-500 hover:to-red-600 transition-all pr-12 text-center"
+                        >
+                            <option value={2026} className="bg-gray-900 text-white">2026</option>
+                            <option value={2025} className="bg-gray-900 text-white">2025</option>
+                            <option value={2024} className="bg-gray-900 text-white">2024</option>
+                            <option value={2023} className="bg-gray-900 text-white">2023</option>
+                            <option value={2022} className="bg-gray-900 text-white">2022</option>
+                            <option value={2021} className="bg-gray-900 text-white">2021</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                            <svg className="fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
@@ -95,7 +122,7 @@ export default function Races() {
                                                 ${isFerrari
                                                     ? 'bg-red-900/20 border border-red-800/50'
                                                     : 'bg-gray-800/30 hover:bg-gray-800/50'}
-                                             `}>
+                                           `}>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
                                                     <span className={`
@@ -128,7 +155,6 @@ export default function Races() {
                     </div>
                     {/* Races Grid */}
                     <div className="lg:col-span-2">
-                        {/* ALTERADO: Cards maiores (menos colunas) */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                             {races.map((race) => {
                                 const isCompleted = new Date(race.date_start) < new Date();
@@ -189,7 +215,7 @@ export default function Races() {
                                                 ${isFerrari
                                                     ? 'bg-red-900/20 border border-red-800/50'
                                                     : 'bg-gray-800/30 hover:bg-gray-800/50'}
-                                             `}>
+                                           `}>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
                                                     <span className={`
